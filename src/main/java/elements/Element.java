@@ -1,6 +1,7 @@
 package main.java.elements;
 
 import javafx.scene.canvas.Canvas;
+import main.java.common.Parameters;
 import main.java.communication.Movements;
 import main.java.model.Sprite;
 
@@ -19,7 +20,7 @@ public interface Element {
 
     void eat(List<Element> elements);
 
-    void reproduce();
+    void reproduce(Element element);
 
     void render();
 
@@ -27,12 +28,14 @@ public interface Element {
 
     void collisionDetect();
 
+    void updateLastReproduction();
+
     default Movements moves(final Sprite sprite, final Canvas canvas, final Movements last, Integer drives) {
-        final Movements mov = drives % 15 == 0 ? Movements.getRandom(last) : last;
+        final Movements mov = drives % Parameters.getInstance().getMovimentosPorDirecao() == 0 ? Movements.getRandom(last) : last;
         clearVelocity(sprite);
 
         if (mov == Movements.UP) {
-            if (sprite.getBoundary().getMinY() - 15 > 0) {
+            if (sprite.getBoundary().getMinY() - 5 > 0) {
                 sprite.addVelocity(0, -15);
             } else {
                 clearVelocity(sprite);
@@ -40,7 +43,7 @@ public interface Element {
         }
 
         if (mov == Movements.DOWN) {
-            if (sprite.getBoundary().getMinY() + 130 < canvas.getHeight()) {
+            if (sprite.getBoundary().getMaxY() + 5 < canvas.getHeight()) {
                 sprite.addVelocity(0, 15);
             } else {
                 clearVelocity(sprite);
@@ -48,7 +51,7 @@ public interface Element {
         }
 
         if (mov == Movements.LEFT) {
-            if (sprite.getBoundary().getMinX() - 30 > 0) {
+            if (sprite.getBoundary().getMinX() - 5 > 0) {
                 sprite.addVelocity(-30, 0);
             } else {
                 clearVelocity(sprite);
@@ -56,7 +59,7 @@ public interface Element {
         }
 
         if (mov == Movements.RIGHT) {
-            if (sprite.getBoundary().getMinX() + 120 < canvas.getWidth()) {
+            if (sprite.getBoundary().getMaxX() + 5 < canvas.getWidth()) {
                 sprite.addVelocity(15, 0);
             } else {
                 clearVelocity(sprite);
@@ -75,8 +78,8 @@ public interface Element {
     default Sprite generateElement(final Canvas canvas, final String image) {
         final Random random = new Random();
 
-        final int x = random.nextInt((int)canvas.getWidth() - 30);
-        final int y = random.nextInt((int)canvas.getHeight() - 30);
+        final int x = random.nextInt((int)canvas.getWidth() - 100);
+        final int y = random.nextInt((int)canvas.getHeight() - 100);
 
         return createNewSprite(x, y, image);
 
@@ -93,10 +96,11 @@ public interface Element {
 
     default void startLifeCycle() {
         new Thread(() -> {
-            while (decrementCalorieCounter() > 0) {
+            while (isAlive() && decrementCalorieCounter() > 0) {
                 try {
                     collisionDetect();
-                    Thread.sleep(1500);
+                    Thread.sleep(Parameters.getInstance().getTempoDecrementoCalorias());
+                    avaibleToReproduce();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -104,4 +108,9 @@ public interface Element {
         }).start();
     }
 
+    void avaibleToReproduce();
+
+    Boolean isAlive();
+
+    Sprite getSprite();
 }

@@ -2,9 +2,12 @@ package main.java.elements;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import main.java.common.Parameters;
 import main.java.communication.Movements;
 import main.java.model.Sprite;
 
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.RecursiveAction;
@@ -14,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class Tamandua extends RecursiveAction implements Element {
 
-    public static final String tamanduaImage = "Assets/tamandua.png";
+    private static final String tamanduaImage = "Assets/tamandua.png";
 
     private Long calorieCounter;
 
@@ -36,6 +39,14 @@ public class Tamandua extends RecursiveAction implements Element {
 
     private Boolean avaibleToReproduce;
 
+    private LocalTime lastReproduction;
+
+    private Boolean isAlive;
+
+    private final Integer incrementoPorIngestao = Parameters.getInstance().getIncrementoPorIngestao();
+    private final Integer intervaloReproducaoTamanduas = Parameters.getInstance().getIntervaloReproducaoTamandua();
+    private final Long numeroCalorias = Long.valueOf(Parameters.getInstance().getNumeroCalorias());
+
     public Tamandua(final Long calorieCounter, final AtomicInteger elementsCounter, final GraphicsContext graphicsContext, final Canvas canvas, final List<Element> tamanduas, final List<Element> ants) {
         this.calorieCounter = calorieCounter;
         this.elementsCounter = elementsCounter;
@@ -45,9 +56,11 @@ public class Tamandua extends RecursiveAction implements Element {
         this.ants = ants;
         this.drives = 0;
         this.avaibleToReproduce = true;
+        this.lastReproduction = LocalTime.MIN;
+        this.isAlive = true;
 
         this.tamandua = generateElement(canvas, Tamandua.tamanduaImage);
-
+        this.elementsCounter.incrementAndGet();
         this.startLifeCycle();
     }
 
@@ -65,7 +78,7 @@ public class Tamandua extends RecursiveAction implements Element {
 
     @Override
     public Long incrementCalorieCounter() {
-        return ++calorieCounter;
+        return calorieCounter += incrementoPorIngestao;
     }
 
     @Override
@@ -80,9 +93,13 @@ public class Tamandua extends RecursiveAction implements Element {
     }
 
     @Override
-    public synchronized void die() {
+    public void die() {
         calorieCounter = 0L;
-        this.tamanduas.remove(this);
+        this.isAlive = false;
+        this.elementsCounter.decrementAndGet();
+        synchronized (tamanduas) {
+            this.tamanduas.remove(this);
+        }
     }
 
     @Override
@@ -97,14 +114,25 @@ public class Tamandua extends RecursiveAction implements Element {
     }
 
     @Override
-    public synchronized void reproduce() {
-        final Tamandua tamandua = new Tamandua(15L, elementsCounter, graphicsContext, canvas, tamanduas, ants);
+    public synchronized void reproduce(Element element) {
+        final Tamandua tamandua = new Tamandua(numeroCalorias, elementsCounter, graphicsContext, canvas, tamanduas, ants);
+
+        while ((element.intersects(this.tamandua))) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
         tamanduas.add(tamandua);
 
-        tamandua.fork();
+        tamandua.fork().quietlyJoin();
 
         notAvaibleToReproduce();
+
+        element.updateLastReproduction();
+        updateLastReproduction();
     }
 
     @Override
@@ -120,19 +148,28 @@ public class Tamandua extends RecursiveAction implements Element {
     @Override
     public synchronized void collisionDetect() {
         eat(intersectsWithAnt());
-        Optional<Tamandua> spouse = intersectsWithTamandua();
-        if (spouse.isPresent() && avaibleToReproduce) {
-            spouse.get().notAvaibleToReproduce();
-            reproduce();
+        Optional<Tamandua> optSpouse = intersectsWithTamandua();
+        if (optSpouse.isPresent() && isAvaibleToReproduce()) {
+            final Tamandua spouse = optSpouse.get();
+            spouse.notAvaibleToReproduce();
+            reproduce(spouse);
         }
     }
 
-    private List<Element> intersectsWithAnt() {
-        final Predicate<Element> intersectsWithTamandua = ant -> ant.intersects(tamandua);
+    @Override
+    public Boolean isAlive() {
+        return this.isAlive;
+    }
 
-        return ants.stream()
-                .filter(intersectsWithTamandua)
-                .collect(Collectors.toList());
+    private List<Element> intersectsWithAnt() {
+        synchronized (ants) {
+            final Predicate<Element> intersectsWithTamandua = ant -> ant.intersects(tamandua);
+
+            return ants.stream()
+                    .filter(intersectsWithTamandua)
+                    .filter(Element::isAlive)
+                    .collect(Collectors.toList());
+        }
     }
 
     private Optional<Tamandua> intersectsWithTamandua() {
@@ -145,11 +182,26 @@ public class Tamandua extends RecursiveAction implements Element {
                 .findAny();
     }
 
-    public Boolean isAvaibleToReproduce() {
-        return this.avaibleToReproduce;
+    private Boolean isAvaibleToReproduce() {
+        return this.avaibleToReproduce && Duration.between(lastReproduction, LocalTime.now()).getSeconds() > intervaloReproducaoTamanduas;
     }
 
-    public void notAvaibleToReproduce() {
+    private void notAvaibleToReproduce() {
         this.avaibleToReproduce = false;
+    }
+
+    @Override
+    public void avaibleToReproduce() {
+        this.avaibleToReproduce = true;
+    }
+
+    @Override
+    public void updateLastReproduction() {
+        this.lastReproduction = LocalTime.now();
+    }
+
+    @Override
+    public Sprite getSprite() {
+        return tamandua;
     }
 }

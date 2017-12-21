@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="318.0000999999975" prefWidth="687.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="main.java.view.Menu">
+  <children>
+    <TextField fx:id="numeroTamanduas" cache="true" cacheHint="DEFAULT" layoutX="29.0" layoutY="63.0" mouseTransparent="false" prefWidth="200.0" promptText="Número inicial de tamanduás" text="10" />
+    <TextField fx:id="numeroFormigas" layoutX="344.0" layoutY="63.0" prefWidth="200.0" promptText="Número inicial de formigas" text="20" />
+    <TextField fx:id="numeroCalorias" layoutX="29.0" layoutY="112.0" prefWidth="200.0" promptText="Número inicial de calorias" text="20" />
+    <Text layoutX="29.0" layoutY="60.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Número de tamanduás">
+      <font>
+        <Font size="13.0" />
+      </font>
+    </Text>
+    <Text layoutX="344.0" layoutY="60.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Número de formigas" />
+    <Text layoutX="29.0" layoutY="109.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Número de calorias" />
+    <TextField fx:id="tempoDecrementoCalorias" layoutX="29.0" layoutY="160.0" prefWidth="200.0" promptText="Tempo sem segundos para decremento das calorias" text="0.5" />
+    <Text layoutX="29.0" layoutY="157.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Tempo para decrementar calorias (Segundos)" />
+    <TextField fx:id="caloriasReproducaoFormigas" layoutX="344.0" layoutY="112.0" prefWidth="200.0" promptText="Número de calorias para reprodução das formigas" text="15" />
+    <Text layoutX="344.0" layoutY="109.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Calorias para reprodução das formigas" />
+    <TextField fx:id="caloriasRemovidasReproducaoFormigas" layoutX="344.0" layoutY="160.0" prefWidth="200.0" promptText="Número de calorias que serão removidas na reprodução das formigas" text="10" />
+    <Text layoutX="344.0" layoutY="157.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Calorias removidas na reprodução das formigas" />
+    <TextField fx:id="tempoGeracaoAcucares" layoutX="29.0" layoutY="208.0" prefWidth="200.0" promptText="Número de nanosegundos que formaram o intervalo de geração das formigas" text="100000000" />
+    <Text layoutX="29.0" layoutY="205.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Tempo para geração de açucares (Nanos)" />
+    <TextField fx:id="movimentosPorDirecao" layoutX="344.0" layoutY="208.0" prefWidth="200.0" promptText="Número minimo de movimentos que cada elemento deve efetuar em cada direção" text="15" />
+    <Text layoutX="344.0" layoutY="205.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Números de movimentos em cada direção" />
+    <Button fx:id="simular" layoutX="597.0" layoutY="283.0" mnemonicParsing="false" onAction="#efetuarSimulacao" text="Simular" />
+    <TextField fx:id="incrementoPorIngestao" layoutX="29.0" layoutY="255.0" prefWidth="200.0" promptText="Número de calorias por ingestão realizada" text="10" />
+    <Text layoutX="29.0" layoutY="252.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Calorias por ingestão" />
+    <TextField fx:id="intervaloReproducaoTamandua" layoutX="344.0" layoutY="255.0" prefWidth="200.0" promptText="Tempo de intervalo em segundos para disponibilizar reprodução dos tamanduás" text="5" />
+    <Text layoutX="344.0" layoutY="249.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Tempo de intervalo reprodução tamanduás" />
+  </children>
+</AnchorPane>

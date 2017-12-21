@@ -1,76 +1,90 @@
 package main.java.elements;
 
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import main.java.model.Sprite;
 
 import java.util.List;
-import java.util.concurrent.RecursiveAction;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public class Sugar extends RecursiveAction implements Element {
+public class Sugar implements Element {
 
-    public static final String sugarImage = "Assets/sugar_cube.png";
+    private static final String sugarImage = "Assets/sugar_cube.png";
 
-    private Long calorieCounter;
+    private final GraphicsContext graphicsContext;
 
-    private final AtomicInteger elementsCounter;
+    private final List<Element> sugars;
 
     private final Sprite sugar;
 
-    public Sugar(final Long calorieCounter, final AtomicInteger elementsCounter) {
-        this.calorieCounter = calorieCounter;
-        this.elementsCounter = elementsCounter;
+    private Boolean isAlive;
 
-        this.sugar = new Sprite();
-    }
+    public Sugar(final GraphicsContext graphicsContext, final Canvas canvas, final List<Element> sugars) {
+        this.graphicsContext = graphicsContext;
+        this.sugars = sugars;
+        this.isAlive = true;
 
-    @Override
-    protected void compute() {
+        this.sugar = generateElement(canvas, Sugar.sugarImage);
     }
 
     @Override
     public Long incrementCalorieCounter() {
-        return --calorieCounter;
+        return null;
     }
 
     @Override
     public Long decrementCalorieCounter() {
-        return --calorieCounter;
+        return null;
     }
 
     @Override
     public void die() {
-        calorieCounter = 0L;
-    }
-
-    @Override
-    public void eat(Element element) {
-        element.die();
-        incrementCalorieCounter();
-    }
-
-    @Override
-    public void collisionDetect() {
-
-    }
-
-    @Override
-    public void eat(List<Element> elements) {
-
-    }
-
-
-    @Override
-    public void reproduce() {
-
+        isAlive = false;
+        synchronized (sugars) {
+            this.sugars.remove(this);
+        }
     }
 
     @Override
     public void render() {
+        this.sugar.render(this.graphicsContext);
+    }
 
+    @Override
+    public Boolean isAlive() {
+        return isAlive;
+    }
+
+    @Override
+    public Sprite getSprite() {
+        return this.sugar;
+    }
+
+    @Override
+    public void eat(Element element) {
+    }
+
+    @Override
+    public void eat(List<Element> elements) {
+    }
+
+    @Override
+    public synchronized void reproduce(Element element) {
     }
 
     @Override
     public boolean intersects(Sprite s) {
-        return false;
+        return this.sugar.intersects(s);
+    }
+
+    @Override
+    public synchronized void collisionDetect() {
+    }
+
+    @Override
+    public void avaibleToReproduce() {
+    }
+
+    @Override
+    public void updateLastReproduction() {
     }
 }

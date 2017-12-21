@@ -5,15 +5,13 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.StackPane;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import main.java.communication.Movements;
-import main.java.model.Sprite;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameScreen extends Application {
@@ -22,16 +20,13 @@ public class GameScreen extends Application {
     private Scene scene;
     private Canvas canvas;
     private GraphicsContext graphicsContext;
-    private List<Sprite> bomb;
     private AtomicInteger elementsCounter;
-    private List<Movements> movements;
     private Font font;
     private Animation animation;
 
-    public GameScreen() {
-        this.bomb = new ArrayList<>();
-        this.movements = new ArrayList<>();
+    private static final String BACKGROUND = "Assets/grass.png";
 
+    public GameScreen() {
         this.elementsCounter = new AtomicInteger(0);
     }
 
@@ -51,12 +46,12 @@ public class GameScreen extends Application {
         this.scene = new Scene(root);
         StackPane holder = new StackPane();
 
-        this.canvas = new Canvas(1024, 700);
+        this.canvas = new Canvas(Toolkit.getDefaultToolkit().getScreenSize().width * 0.98, Toolkit.getDefaultToolkit().getScreenSize().height * 0.9);
 
         holder.getChildren().add(canvas);
         this.root.getChildren().add(holder);
 
-        holder.setStyle("-fx-background-color: #b5b5b5");
+        setBackround(holder);
 
         this.graphicsContext = canvas.getGraphicsContext2D();
 
@@ -64,28 +59,28 @@ public class GameScreen extends Application {
         primaryStage.setScene(scene);
     }
 
+    private void setBackround(final StackPane stackPane) {
+        final Image image = new Image(GameScreen.BACKGROUND);
+
+        stackPane.setBackground(new Background(new BackgroundImage(image, BackgroundRepeat.REPEAT, BackgroundRepeat.REPEAT, BackgroundPosition.CENTER, BackgroundSize.DEFAULT)));
+    }
+
     private void setupTitle(final Stage primaryStage, final String title) {
         primaryStage.setTitle(title);
     }
 
     private void setupFont() {
-        this.font = Font.font("Helvetica", FontWeight.BOLD, 40);
+        this.font = Font.font("Helvetica", FontWeight.BOLD, 20);
     }
 
     private void setupAnimation() {
         this.animation = new Animation.AnimationBuilder()
                                        .withCanvas(this.canvas)
                                        .withGraphicsContext(this.graphicsContext)
-                                       .withBomb(this.bomb)
                                        .withElementsCounter(this.elementsCounter)
-                                       .withMovements(this.movements)
                                        .withFont(this.font)
                                        .build();
 
         this.animation.start();
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }

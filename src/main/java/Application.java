@@ -1,19 +1,25 @@
 package main.java;
 
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import main.java.view.GameScreen;
 
-/**
- * Created by connected on 7/1/17.
- */
-public class Application extends javafx.application.Application {
 
-    public static void main(String[] args) {
-        GameScreen.launch(args);
-    }
+public class Application extends javafx.application.Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        //GameScreen.launch(args);
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("view/Menu.fxml"));
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 }
