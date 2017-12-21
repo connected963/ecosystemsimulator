@@ -5,6 +5,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.Stage;
 import main.java.common.Parameters;
 import main.java.elements.Ant;
 import main.java.elements.Element;
@@ -22,6 +23,7 @@ import java.util.function.Function;
 
 public class Animation extends AnimationTimer {
 
+    private Stage stage;
     private Canvas canvas;
     private GraphicsContext graphicsContext;
     private AtomicInteger elementsCounter;
@@ -45,6 +47,7 @@ public class Animation extends AnimationTimer {
         this.elementsCounter = animationBuilder.elementsCounter;
         this.simulationStarted = LocalTime.now();
         this.font = animationBuilder.font;
+        this.stage = animationBuilder.stage;
 
         this.lastRenderedSugar = LocalTime.MIN;
         this.forkJoinPool = new ForkJoinPool(200);
@@ -109,6 +112,7 @@ public class Animation extends AnimationTimer {
 
     @Override
     public void stop() {
+        endOfSimulation();
         super.stop();
     }
 
@@ -117,9 +121,9 @@ public class Animation extends AnimationTimer {
     }
 
     private void renderSugars() {
-        synchronized (sugars) {
-            this.sugars.forEach(Element::render);
-        }
+        this.sugars.stream()
+                .filter(Element::isAlive)
+                .forEach(Element::render);
     }
 
     private void renderCounters() {
@@ -190,12 +194,17 @@ public class Animation extends AnimationTimer {
         return !this.tamanduas.isEmpty() || !this.ants.isEmpty();
     }
 
+    private void endOfSimulation() {
+        stage.setTitle("Finalized!!!");
+    }
+
     public static class AnimationBuilder {
 
         private Canvas canvas;
         private GraphicsContext graphicsContext;
         private AtomicInteger elementsCounter;
         private Font font;
+        private Stage stage;
 
 
         public AnimationBuilder withCanvas(Canvas canvas) {
@@ -215,6 +224,11 @@ public class Animation extends AnimationTimer {
 
         public AnimationBuilder withFont(Font font) {
             this.font = font;
+            return this;
+        }
+
+        public AnimationBuilder withStage(Stage stage) {
+            this.stage = stage;
             return this;
         }
 

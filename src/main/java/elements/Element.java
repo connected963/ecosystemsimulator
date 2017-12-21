@@ -52,7 +52,7 @@ public interface Element {
 
         if (mov == Movements.LEFT) {
             if (sprite.getBoundary().getMinX() - 5 > 0) {
-                sprite.addVelocity(-30, 0);
+                sprite.addVelocity(-15, 0);
             } else {
                 clearVelocity(sprite);
             }
@@ -61,6 +61,38 @@ public interface Element {
         if (mov == Movements.RIGHT) {
             if (sprite.getBoundary().getMaxX() + 5 < canvas.getWidth()) {
                 sprite.addVelocity(15, 0);
+            } else {
+                clearVelocity(sprite);
+            }
+        }
+
+        if (mov == Movements.UP_RIGHT) {
+            if (sprite.getBoundary().getMinY() - 5 > 0 && sprite.getBoundary().getMaxX() + 5 < canvas.getWidth()) {
+                sprite.addVelocity(15, -15);
+            } else {
+                clearVelocity(sprite);
+            }
+        }
+
+        if (mov == Movements.UP_LEFT) {
+            if (sprite.getBoundary().getMinY() - 5 > 0 && sprite.getBoundary().getMinX() - 5 > 0) {
+                sprite.addVelocity(-15, -15);
+            } else {
+                clearVelocity(sprite);
+            }
+        }
+
+        if (mov == Movements.DOWN_RIGHT) {
+            if (sprite.getBoundary().getMaxY() + 5 < canvas.getHeight() && sprite.getBoundary().getMaxX() + 5 < canvas.getWidth()) {
+                sprite.addVelocity(15, 15);
+            } else {
+                clearVelocity(sprite);
+            }
+        }
+
+        if (mov == Movements.DOWN_LEFT) {
+            if (sprite.getBoundary().getMaxY() + 5 < canvas.getHeight() && sprite.getBoundary().getMinX() - 5 > 0) {
+                sprite.addVelocity(-15, 15);
             } else {
                 clearVelocity(sprite);
             }

@@ -147,9 +147,11 @@ public class Ant extends RecursiveAction implements Element {
     }
 
     private List<Element> intersectsWithSugar() {
-        final Predicate<Element> intersectsWithSugar = sugar -> sugar.intersects(this.ant);
+        final Sprite copy = this.ant.copy();
+        final Predicate<Element> intersectsWithSugar = sugar -> sugar.intersects(copy);
 
         return sugar.stream()
+                .filter(Element::isAlive)
                 .filter(intersectsWithSugar)
                 .collect(Collectors.toList());
     }

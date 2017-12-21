@@ -69,6 +69,14 @@ public class Sprite {
         return s.getBoundary().intersects(this.getBoundary());
     }
 
+    public Sprite copy() {
+        final Sprite copied = new Sprite();
+        copied.setImage(this.image);
+        copied.setPosition(this.positionX, this.positionY);
+
+        return copied;
+    }
+
     public String toString() {
         return " Position: [" + positionX + "," + positionY + "]"
                 + " Velocity: [" + velocityX + "," + velocityY + "]";

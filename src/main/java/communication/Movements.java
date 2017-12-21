@@ -10,7 +10,11 @@ public enum Movements {
     UP('U'),
     DOWN('D'),
     LEFT('L'),
-    RIGHT('R');
+    RIGHT('R'),
+    UP_LEFT('E'),
+    UP_RIGHT('C'),
+    DOWN_LEFT('V'),
+    DOWN_RIGHT('O'),;
 
     private Character value;
 
@@ -31,8 +35,20 @@ public enum Movements {
         }
         else if (this == RIGHT) {
             return LEFT;
-        } else {
+        }
+        else if (this == LEFT) {
             return RIGHT;
+        }
+        else if (this == UP_LEFT) {
+            return DOWN_RIGHT;
+        }
+        else if (this == UP_RIGHT) {
+            return DOWN_LEFT;
+        }
+        else if (this == DOWN_RIGHT) {
+            return UP_LEFT;
+        } else {
+            return UP_RIGHT;
         }
     }
 

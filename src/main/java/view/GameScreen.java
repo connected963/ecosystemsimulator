@@ -23,6 +23,7 @@ public class GameScreen extends Application {
     private AtomicInteger elementsCounter;
     private Font font;
     private Animation animation;
+    public static Stage stage;
 
     private static final String BACKGROUND = "Assets/grass.png";
 
@@ -57,6 +58,7 @@ public class GameScreen extends Application {
 
         primaryStage.setResizable(false);
         primaryStage.setScene(scene);
+        stage = primaryStage;
     }
 
     private void setBackround(final StackPane stackPane) {
@@ -75,12 +77,20 @@ public class GameScreen extends Application {
 
     private void setupAnimation() {
         this.animation = new Animation.AnimationBuilder()
-                                       .withCanvas(this.canvas)
-                                       .withGraphicsContext(this.graphicsContext)
-                                       .withElementsCounter(this.elementsCounter)
-                                       .withFont(this.font)
-                                       .build();
+                .withStage(stage)
+                .withCanvas(this.canvas)
+                .withGraphicsContext(this.graphicsContext)
+                .withElementsCounter(this.elementsCounter)
+                .withFont(this.font)
+                .build();
 
         this.animation.start();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+
+        animation = null;
     }
 }

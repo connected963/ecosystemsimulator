@@ -183,7 +183,7 @@ public class Tamandua extends RecursiveAction implements Element {
     }
 
     private Boolean isAvaibleToReproduce() {
-        return this.avaibleToReproduce && Duration.between(lastReproduction, LocalTime.now()).getSeconds() > intervaloReproducaoTamanduas;
+        return this.avaibleToReproduce && Duration.between(lastReproduction, LocalTime.now()).getSeconds() > intervaloReproducaoTamanduas && !ants.isEmpty();
     }
 
     private void notAvaibleToReproduce() {
