@@ -14,8 +14,11 @@ import main.java.elements.Tamandua;
 
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -30,7 +33,7 @@ public class Animation extends AnimationTimer {
     private LocalTime simulationStarted;
     private Font font;
     private LocalTime lastRenderedSugar;
-    private final ForkJoinPool forkJoinPool;
+    private final ExecutorService executorService;
     private final List<Element> tamanduas;
     private final List<Element> ants;
     private final List<Element> sugars;
@@ -50,7 +53,7 @@ public class Animation extends AnimationTimer {
         this.stage = animationBuilder.stage;
 
         this.lastRenderedSugar = LocalTime.MIN;
-        this.forkJoinPool = new ForkJoinPool(200);
+        this.executorService = Executors.newCachedThreadPool();
         this.tamanduas = new CopyOnWriteArrayList<>();
         this.ants = new CopyOnWriteArrayList<>();
         this.sugars = new CopyOnWriteArrayList<>();
@@ -63,9 +66,9 @@ public class Animation extends AnimationTimer {
         Integer anteatersNumber = Parameters.getInstance().getNumeroTamanduas();
 
         for (int i = 0; i < anteatersNumber; i++) {
-            Tamandua tamandua = new Tamandua(numeroCalorias, elementsCounter, graphicsContext, canvas, tamanduas, ants);
+            Tamandua tamandua = new Tamandua(numeroCalorias, elementsCounter, graphicsContext, canvas, tamanduas, ants, executorService);
             tamanduas.add(tamandua);
-            forkJoinPool.execute(tamandua);
+            executorService.submit(tamandua);
         }
     }
 
@@ -73,9 +76,9 @@ public class Animation extends AnimationTimer {
         Integer antsNumber = Parameters.getInstance().getNumeroFormigas();
 
         for (int i = 0; i < antsNumber; i++) {
-            Ant ant = new Ant(numeroCalorias, elementsCounter, graphicsContext, canvas, ants, sugars);
+            Ant ant = new Ant(numeroCalorias, elementsCounter, graphicsContext, canvas, ants, sugars, executorService);
             ants.add(ant);
-            forkJoinPool.execute(ant);
+            executorService.submit(ant);
         }
     }
 

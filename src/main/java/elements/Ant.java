@@ -8,12 +8,13 @@ import main.java.model.Sprite;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class Ant extends RecursiveAction implements Element {
+public class Ant implements Element, Callable<Void> {
 
     private static final String antImage = "Assets/ant.png";
 
@@ -35,6 +36,8 @@ public class Ant extends RecursiveAction implements Element {
 
     private final List<Element> sugar;
 
+    private final ExecutorService executorService;
+
     private Boolean avaibleToReproduce;
 
     private LocalTime lastReproduction;
@@ -46,13 +49,14 @@ public class Ant extends RecursiveAction implements Element {
     private final Integer caloriasRemovidasReproducao = Parameters.getInstance().getCaloriasRemovidasReproducaoFormigas();
     private final Long numeroCalorias = Long.valueOf(Parameters.getInstance().getNumeroCalorias());
 
-    public Ant(final Long calorieCounter, final AtomicInteger elementsCounter, final GraphicsContext graphicsContext, final Canvas canvas, final List<Element> ants, final List<Element> sugar) {
+    public Ant(final Long calorieCounter, final AtomicInteger elementsCounter, final GraphicsContext graphicsContext, final Canvas canvas, final List<Element> ants, final List<Element> sugar, final ExecutorService executorService) {
         this.calorieCounter = calorieCounter;
         this.elementsCounter = elementsCounter;
         this.graphicsContext = graphicsContext;
         this.canvas = canvas;
         this.ants = ants;
         this.sugar = sugar;
+        this.executorService = executorService;
         this.drives = 0;
         this.avaibleToReproduce = true;
         this.lastReproduction = LocalTime.MIN;
@@ -64,16 +68,19 @@ public class Ant extends RecursiveAction implements Element {
     }
 
     @Override
-    protected void compute() {
+    public Void call() {
         while (calorieCounter > 0) {
             try {
+                collisionDetect();
                 lastMoviment = moves(ant, canvas, lastMoviment, drives++);
                 Thread.sleep(25);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        return null;
     }
+
 
     @Override
     public Long incrementCalorieCounter() {
@@ -120,11 +127,11 @@ public class Ant extends RecursiveAction implements Element {
 
     @Override
     public synchronized void reproduce(Element element) {
-        final Ant ant = new Ant(numeroCalorias, elementsCounter, graphicsContext, canvas, ants, sugar);
+        final Ant ant = new Ant(numeroCalorias, elementsCounter, graphicsContext, canvas, ants, sugar, executorService);
 
         ants.add(ant);
 
-        ant.fork().quietlyJoin();
+        executorService.submit(ant);
 
         updateLastReproduction();
 
@@ -142,14 +149,13 @@ public class Ant extends RecursiveAction implements Element {
     }
 
     @Override
-    public synchronized void collisionDetect() {
+    public void collisionDetect() {
         eat(intersectsWithSugar());
     }
 
     private List<Element> intersectsWithSugar() {
         final Sprite copy = this.ant.copy();
         final Predicate<Element> intersectsWithSugar = sugar -> sugar.intersects(copy);
-
         return sugar.stream()
                 .filter(Element::isAlive)
                 .filter(intersectsWithSugar)

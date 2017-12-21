@@ -110,8 +110,8 @@ public interface Element {
     default Sprite generateElement(final Canvas canvas, final String image) {
         final Random random = new Random();
 
-        final int x = random.nextInt((int)canvas.getWidth() - 100);
-        final int y = random.nextInt((int)canvas.getHeight() - 100);
+        final int x = random.nextInt((int) canvas.getWidth() - 100);
+        final int y = random.nextInt((int) canvas.getHeight() - 100);
 
         return createNewSprite(x, y, image);
 
@@ -130,7 +130,6 @@ public interface Element {
         new Thread(() -> {
             while (isAlive() && decrementCalorieCounter() > 0) {
                 try {
-                    collisionDetect();
                     Thread.sleep(Parameters.getInstance().getTempoDecrementoCalorias());
                     avaibleToReproduce();
                 } catch (InterruptedException e) {

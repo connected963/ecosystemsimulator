@@ -10,12 +10,13 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class Tamandua extends RecursiveAction implements Element {
+public class Tamandua implements Element, Callable<Void> {
 
     private static final String tamanduaImage = "Assets/tamandua.png";
 
@@ -37,6 +38,8 @@ public class Tamandua extends RecursiveAction implements Element {
 
     private final List<Element> ants;
 
+    private final ExecutorService executorService;
+
     private Boolean avaibleToReproduce;
 
     private LocalTime lastReproduction;
@@ -47,7 +50,7 @@ public class Tamandua extends RecursiveAction implements Element {
     private final Integer intervaloReproducaoTamanduas = Parameters.getInstance().getIntervaloReproducaoTamandua();
     private final Long numeroCalorias = Long.valueOf(Parameters.getInstance().getNumeroCalorias());
 
-    public Tamandua(final Long calorieCounter, final AtomicInteger elementsCounter, final GraphicsContext graphicsContext, final Canvas canvas, final List<Element> tamanduas, final List<Element> ants) {
+    public Tamandua(final Long calorieCounter, final AtomicInteger elementsCounter, final GraphicsContext graphicsContext, final Canvas canvas, final List<Element> tamanduas, final List<Element> ants, final ExecutorService executorService) {
         this.calorieCounter = calorieCounter;
         this.elementsCounter = elementsCounter;
         this.graphicsContext = graphicsContext;
@@ -55,6 +58,7 @@ public class Tamandua extends RecursiveAction implements Element {
         this.tamanduas = tamanduas;
         this.ants = ants;
         this.drives = 0;
+        this.executorService = executorService;
         this.avaibleToReproduce = true;
         this.lastReproduction = LocalTime.MIN;
         this.isAlive = true;
@@ -65,15 +69,18 @@ public class Tamandua extends RecursiveAction implements Element {
     }
 
     @Override
-    protected void compute() {
+    public Void call() {
         while (calorieCounter > 0) {
             try {
+                collisionDetect();
                 lastMoviment = moves(tamandua, canvas, lastMoviment, drives++);
                 Thread.sleep(25);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
+        return null;
     }
 
     @Override
@@ -115,19 +122,11 @@ public class Tamandua extends RecursiveAction implements Element {
 
     @Override
     public synchronized void reproduce(Element element) {
-        final Tamandua tamandua = new Tamandua(numeroCalorias, elementsCounter, graphicsContext, canvas, tamanduas, ants);
-
-        while ((element.intersects(this.tamandua))) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        final Tamandua tamandua = new Tamandua(numeroCalorias, elementsCounter, graphicsContext, canvas, tamanduas, ants, executorService);
 
         tamanduas.add(tamandua);
 
-        tamandua.fork().quietlyJoin();
+        executorService.submit(tamandua);
 
         notAvaibleToReproduce();
 
@@ -146,7 +145,7 @@ public class Tamandua extends RecursiveAction implements Element {
     }
 
     @Override
-    public synchronized void collisionDetect() {
+    public void collisionDetect() {
         eat(intersectsWithAnt());
         Optional<Tamandua> optSpouse = intersectsWithTamandua();
         if (optSpouse.isPresent() && isAvaibleToReproduce()) {
@@ -162,14 +161,11 @@ public class Tamandua extends RecursiveAction implements Element {
     }
 
     private List<Element> intersectsWithAnt() {
-        synchronized (ants) {
-            final Predicate<Element> intersectsWithTamandua = ant -> ant.intersects(tamandua);
-
-            return ants.stream()
-                    .filter(intersectsWithTamandua)
-                    .filter(Element::isAlive)
-                    .collect(Collectors.toList());
-        }
+        final Predicate<Element> intersectsWithTamandua = ant -> ant.intersects(tamandua);
+        return ants.stream()
+                .filter(Element::isAlive)
+                .filter(intersectsWithTamandua)
+                .collect(Collectors.toList());
     }
 
     private Optional<Tamandua> intersectsWithTamandua() {
